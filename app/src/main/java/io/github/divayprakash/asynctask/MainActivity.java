@@ -1,6 +1,7 @@
 package io.github.divayprakash.asynctask;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -141,6 +142,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+            progressDialog.setMessage("Retrieving data");
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
         @Override
         protected String doInBackground(String... urls) {
             InputStream inputStream = null;
@@ -196,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             setTextView(result);
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
         }
     }
 }
