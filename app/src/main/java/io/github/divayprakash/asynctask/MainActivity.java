@@ -19,10 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 if (networkInfo != null && networkInfo.isConnected()) {
                     new AsyncTaskRunner().execute(url);
                 } else {
-                    textView.setText("No network connection available.");
+                    textView.setText("ERROR : No network connection available!");
                 }
             }
         });
@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url = new URL(urls[0]);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setConnectTimeout(7000);
-                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(9000);
+                httpURLConnection.setReadTimeout(7000);
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoInput(true);
                 Log.d(DEBUG_RUNNER_TAG, "Trying to connect");
@@ -139,13 +139,25 @@ public class MainActivity extends AppCompatActivity {
                 int response = httpURLConnection.getResponseCode();
                 Log.d(DEBUG_RUNNER_TAG, "The response is: " + response);
                 inputStream = httpURLConnection.getInputStream();
-                Reader reader = new InputStreamReader(inputStream, "UTF-8");
-                char[] buffer = new char[length];
-                reader.read(buffer);
-                reader.close();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                String line, buffer = new String();
+                while ((line = bufferedReader.readLine()) != null) {
+                    buffer += line;
+                    buffer += "\n";
+                }
                 httpURLConnection.disconnect();
-                String contentAsString = new String(buffer);
-                return contentAsString;
+                String upToNCharacters = buffer.substring(0, Math.min(buffer.length(), 4000));
+                if (buffer.length() > 4000) {
+                    Log.d(DEBUG_RUNNER_TAG, "Response buffer length = " + buffer.length());
+                    int chunkCount = buffer.length() / 4000;
+                    for (int i = 1; i <= chunkCount; i++) {
+                        int max = 4000 * (i + 1);
+                        String chunkIdentifier = "chunk " + (i + 1) + " of " + (chunkCount + 1) + ":" ;
+                        String loggingData = buffer.substring(4000 * i, Math.min(buffer.length(), max));
+                        Log.d(DEBUG_RUNNER_TAG, chunkIdentifier + loggingData);
+                    }
+                }
+                return upToNCharacters;
             } catch (SocketTimeoutException e) {
                 Log.d(DEBUG_RUNNER_TAG, "SocketTimeoutException encountered");
                 return "ERROR : Connection timed out!";
