@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AsyncTask</string>
+    <string name="app_name">AsyncTask Demo</string>
     <string name="action_exit">Exit</string>
-    <string name="default_text">Hello World!</string>
+    <string name="default_text">This appplication is built as a demo to showcase the use of AsyncTask to perform network operations in a separate thread from the UI thread. It fetches data from the 'About' page of the IIIT Delhi website in an AsyncTask. Press the button to retrieve data.</string>
 </resources>
