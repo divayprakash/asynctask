@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,24 +75,12 @@ public class MainActivity extends AppCompatActivity {
 
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
         private static final String DEBUG_TAG = "AsyncTaskDemo";
-
         @Override
         protected String doInBackground(String... urls) {
-            try {
-                return downloadUrl(urls[0]);
-            } catch (IOException e) {
-                return "Unable to retrieve web page!";
-            }
-        }
-        @Override
-        protected void onPostExecute(String result) {
-            textView.setText(result);
-        }
-        private String downloadUrl(String myurl) throws IOException, UnsupportedEncodingException {
             InputStream inputStream = null;
             int length = 500;
             try {
-                URL url = new URL(myurl);
+                URL url = new URL(urls[0]);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setConnectTimeout(7000);
                 httpURLConnection.setReadTimeout(5000);
@@ -110,11 +98,27 @@ public class MainActivity extends AppCompatActivity {
                 httpURLConnection.disconnect();
                 String contentAsString = new String(buffer);
                 return contentAsString;
+            } catch (SocketTimeoutException e) {
+                Log.d(DEBUG_TAG, "SocketTimeoutException encountered");
+                return "ERROR : Connection timed out!";
+            } catch (IOException e) {
+                Log.d(DEBUG_TAG, "IOException encountered");
+                return "ERROR : Unable to retrieve webpage!";
             } finally {
                 if (inputStream != null) {
-                    inputStream.close();
+                    try {
+                        inputStream.close();
+                    }
+                    catch (IOException e) {
+                        Log.d(DEBUG_TAG, "IOException encountered in closing inputStream");
+                        return "ERROR : Unable to retrieve webpage!";
+                    }
                 }
             }
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            textView.setText(result);
         }
     }
 }
