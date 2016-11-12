@@ -33,11 +33,17 @@ public class MainActivity extends AppCompatActivity {
     private final static int PERMISSIONS_REQUEST_NETWORK_STATE = 2;
     private static final String DEBUG_PERMISSIONS_TAG = "Permissions";
     private static final String DEBUG_RUNNER_TAG = "AsyncTaskRunner";
+    private static final String ERROR_TAG = "ERROR";
+    private String mainText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.main_text);
+        mainText = (String) textView.getText();
+        if (savedInstanceState != null) {
+            setTextView(savedInstanceState.getString("MainText"));
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         checkPermissions();
@@ -57,10 +63,17 @@ public class MainActivity extends AppCompatActivity {
                 if (networkInfo != null && networkInfo.isConnected()) {
                     new AsyncTaskRunner().execute(url);
                 } else {
-                    textView.setText("ERROR : No network connection available!");
+                    Log.e(ERROR_TAG, "ERROR : No network connection available!");
+                    setTextView("ERROR : No network connection available!");
                 }
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString("MainText", mainText);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void checkPermissions() {
@@ -122,11 +135,15 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void setTextView(String text) {
+        mainText = new String(text);
+        textView.setText(text);
+    }
+
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
             InputStream inputStream = null;
-            int length = 500;
             try {
                 URL url = new URL(urls[0]);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -159,10 +176,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return upToNCharacters;
             } catch (SocketTimeoutException e) {
-                Log.d(DEBUG_RUNNER_TAG, "SocketTimeoutException encountered");
+                Log.e(ERROR_TAG, "SocketTimeoutException encountered");
                 return "ERROR : Connection timed out!";
             } catch (IOException e) {
-                Log.d(DEBUG_RUNNER_TAG, "IOException encountered");
+                Log.e(ERROR_TAG, "IOException encountered");
                 return "ERROR : Unable to retrieve webpage!";
             } finally {
                 if (inputStream != null) {
@@ -170,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                         inputStream.close();
                     }
                     catch (IOException e) {
-                        Log.d(DEBUG_RUNNER_TAG, "IOException encountered in closing inputStream");
+                        Log.e(ERROR_TAG, "IOException encountered in closing inputStream");
                         return "ERROR : Unable to retrieve webpage!";
                     }
                 }
@@ -178,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(String result) {
-            textView.setText(result);
+            setTextView(result);
         }
     }
 }
