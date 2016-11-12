@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url = new URL(myurl);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setReadTimeout(10000);
-                httpURLConnection.setConnectTimeout(15000);
+                httpURLConnection.setConnectTimeout(7000);
+                httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoInput(true);
                 Log.d(DEBUG_TAG, "Trying to connect");
