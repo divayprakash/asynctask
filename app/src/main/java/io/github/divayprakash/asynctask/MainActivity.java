@@ -93,19 +93,21 @@ public class MainActivity extends AppCompatActivity {
             int length = 500;
             try {
                 URL url = new URL(myurl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                conn.connect();
-                int response = conn.getResponseCode();
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setReadTimeout(10000);
+                httpURLConnection.setConnectTimeout(15000);
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setDoInput(true);
+                Log.d(DEBUG_TAG, "Trying to connect");
+                httpURLConnection.connect();
+                int response = httpURLConnection.getResponseCode();
                 Log.d(DEBUG_TAG, "The response is: " + response);
-                inputStream = conn.getInputStream();
+                inputStream = httpURLConnection.getInputStream();
                 Reader reader = new InputStreamReader(inputStream, "UTF-8");
                 char[] buffer = new char[length];
                 reader.read(buffer);
                 reader.close();
+                httpURLConnection.disconnect();
                 String contentAsString = new String(buffer);
                 return contentAsString;
             } finally {
