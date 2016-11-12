@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_exit) {
             this.finish();
+            System.exit(0);
             return true;
         }
         return super.onOptionsItemSelected(item);
