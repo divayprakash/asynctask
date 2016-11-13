@@ -36,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_RUNNER_TAG = "AsyncTaskRunner";
     private static final String ERROR_TAG = "ERROR";
     private String mainText;
+    private boolean isRunning;
+    private AsyncTaskRunner asyncTaskRunner;
+    private static final String url = "https://iiitd.ac.in/about";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
         mainText = (String) textView.getText();
         if (savedInstanceState != null) {
             setTextView(savedInstanceState.getString("MainText"));
+            if (savedInstanceState.getBoolean("AsyncTaskStatus")) {
+                asyncTaskRunner = new AsyncTaskRunner();
+                asyncTaskRunner.execute(url);
+            }
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -58,11 +65,12 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(View v) {}
                         })
                         .show();
-                String url = "https://iiitd.ac.in/about";
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
-                    new AsyncTaskRunner().execute(url);
+                    isRunning = true;
+                    asyncTaskRunner = new AsyncTaskRunner();
+                    asyncTaskRunner.execute(url);
                 } else {
                     Log.e(ERROR_TAG, "ERROR : No network connection available!");
                     setTextView("ERROR : No network connection available!");
@@ -74,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putString("MainText", mainText);
+        savedInstanceState.putBoolean("AsyncTaskStatus", isRunning);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -142,6 +151,12 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(text);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (isRunning) asyncTaskRunner.cancel(true);
+    }
+
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
         ProgressDialog progressDialog;
         @Override
@@ -189,9 +204,11 @@ public class MainActivity extends AppCompatActivity {
                 return upToNCharacters;
             } catch (SocketTimeoutException e) {
                 Log.e(ERROR_TAG, "SocketTimeoutException encountered");
+                isRunning = false;
                 return "ERROR : Connection timed out!";
             } catch (IOException e) {
                 Log.e(ERROR_TAG, "IOException encountered");
+                isRunning = false;
                 return "ERROR : Unable to retrieve webpage!";
             } finally {
                 if (inputStream != null) {
@@ -200,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     catch (IOException e) {
                         Log.e(ERROR_TAG, "IOException encountered in closing inputStream");
+                        isRunning = false;
                         return "ERROR : Unable to retrieve webpage!";
                     }
                 }
@@ -207,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(String result) {
+            isRunning = false;
             setTextView(result);
             if (progressDialog != null) {
                 progressDialog.dismiss();
