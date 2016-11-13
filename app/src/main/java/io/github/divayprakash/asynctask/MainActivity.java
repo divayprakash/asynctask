@@ -1,7 +1,6 @@
 package io.github.divayprakash.asynctask;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                     asyncTaskRunner = new AsyncTaskRunner();
                     asyncTaskRunner.execute(url);
                 } else {
-                    Log.e(ERROR_TAG, "ERROR : No network connection available!");
+                    //Log.e(ERROR_TAG, "ERROR : No network connection available!");
                     setTextView("ERROR : No network connection available!");
                 }
             }
@@ -158,15 +157,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
-        ProgressDialog progressDialog;
+        //ProgressDialog progressDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
-            progressDialog.setMessage("Retrieving data");
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
+            //progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+            //progressDialog.setMessage("Retrieving data");
+            //progressDialog.setIndeterminate(true);
+            //progressDialog.setCancelable(false);
+            //progressDialog.show();
         }
         @Override
         protected String doInBackground(String... urls) {
@@ -174,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url = new URL(urls[0]);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setConnectTimeout(9000);
-                httpURLConnection.setReadTimeout(7000);
+                httpURLConnection.setConnectTimeout(7000);
+                httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoInput(true);
                 Log.d(DEBUG_RUNNER_TAG, "Trying to connect");
@@ -188,8 +187,14 @@ public class MainActivity extends AppCompatActivity {
                 while ((line = bufferedReader.readLine()) != null) {
                     buffer += line;
                     buffer += "\n";
+                    if (isCancelled()) {
+                        httpURLConnection.disconnect();
+                        bufferedReader.close();
+                        break;
+                    }
                 }
                 httpURLConnection.disconnect();
+                bufferedReader.close();
                 String upToNCharacters = buffer.substring(0, Math.min(buffer.length(), 4000));
                 if (buffer.length() > 4000) {
                     Log.d(DEBUG_RUNNER_TAG, "Response buffer length = " + buffer.length());
@@ -198,16 +203,17 @@ public class MainActivity extends AppCompatActivity {
                         int max = 4000 * (i + 1);
                         String chunkIdentifier = "chunk " + (i + 1) + " of " + (chunkCount + 1) + ":" ;
                         String loggingData = buffer.substring(4000 * i, Math.min(buffer.length(), max));
-                        Log.d(DEBUG_RUNNER_TAG, chunkIdentifier + loggingData);
+                        //Log.d(DEBUG_RUNNER_TAG, chunkIdentifier + loggingData);
+                        if (isCancelled()) break;
                     }
                 }
                 return upToNCharacters;
             } catch (SocketTimeoutException e) {
-                Log.e(ERROR_TAG, "SocketTimeoutException encountered");
+                //Log.e(ERROR_TAG, "SocketTimeoutException encountered");
                 isRunning = false;
                 return "ERROR : Connection timed out!";
             } catch (IOException e) {
-                Log.e(ERROR_TAG, "IOException encountered");
+                //Log.e(ERROR_TAG, "IOException encountered");
                 isRunning = false;
                 return "ERROR : Unable to retrieve webpage!";
             } finally {
@@ -216,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                         inputStream.close();
                     }
                     catch (IOException e) {
-                        Log.e(ERROR_TAG, "IOException encountered in closing inputStream");
+                        //Log.e(ERROR_TAG, "IOException encountered in closing inputStream");
                         isRunning = false;
                         return "ERROR : Unable to retrieve webpage!";
                     }
@@ -227,9 +233,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             isRunning = false;
             setTextView(result);
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-            }
+            //if (progressDialog != null) progressDialog.dismiss();
         }
     }
 }
