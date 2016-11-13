@@ -29,5 +29,6 @@ public class IntroActivity extends AppIntro {
     public void onDonePressed() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        this.finish();
     }
 }
