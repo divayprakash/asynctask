@@ -23,8 +23,6 @@ public class IntroActivity extends AppIntro {
         slideBackground = getResources().getColor(R.color.slide3background);
         addSlide(AppIntroFragment.newInstance(slideTitle, slideDescription, R.drawable.slide3image, slideBackground));
         showSkipButton(false);
-        setVibrate(true);
-        setVibrateIntensity(30);
         setDepthAnimation();
     }
     @Override
