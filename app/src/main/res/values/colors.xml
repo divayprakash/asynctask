@@ -3,4 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="slide1background">#B53F51</color>
+    <color name="slide2background">#51B53F</color>
+    <color name="slide3background">#B5A33F</color>
 </resources>
