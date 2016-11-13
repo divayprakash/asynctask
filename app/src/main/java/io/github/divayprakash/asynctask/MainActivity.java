@@ -1,6 +1,7 @@
 package io.github.divayprakash.asynctask;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isRunning;
     private AsyncTaskRunner asyncTaskRunner;
     private static final String url = "https://iiitd.ac.in/about";
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             setTextView(savedInstanceState.getString("MainText"));
             if (savedInstanceState.getBoolean("AsyncTaskStatus")) {
+                isRunning = true;
+                progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+                progressDialog.setMessage("Retrieving data");
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
                 asyncTaskRunner = new AsyncTaskRunner();
                 asyncTaskRunner.execute(url);
             }
@@ -68,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
                     isRunning = true;
+                    progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setMessage("Retrieving data");
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
                     asyncTaskRunner = new AsyncTaskRunner();
                     asyncTaskRunner.execute(url);
                 } else {
@@ -154,18 +167,13 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         if (isRunning) asyncTaskRunner.cancel(true);
+        if (progressDialog != null) progressDialog.dismiss();
     }
 
     private class AsyncTaskRunner extends AsyncTask<String, Void, String> {
-        //ProgressDialog progressDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
-            //progressDialog.setMessage("Retrieving data");
-            //progressDialog.setIndeterminate(true);
-            //progressDialog.setCancelable(false);
-            //progressDialog.show();
         }
         @Override
         protected String doInBackground(String... urls) {
@@ -203,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
                         int max = 4000 * (i + 1);
                         String chunkIdentifier = "chunk " + (i + 1) + " of " + (chunkCount + 1) + ":" ;
                         String loggingData = buffer.substring(4000 * i, Math.min(buffer.length(), max));
-                        //Log.d(DEBUG_RUNNER_TAG, chunkIdentifier + loggingData);
+                        Log.d(DEBUG_RUNNER_TAG, chunkIdentifier + loggingData);
                         if (isCancelled()) break;
                     }
                 }
@@ -233,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             isRunning = false;
             setTextView(result);
-            //if (progressDialog != null) progressDialog.dismiss();
+            if (progressDialog != null) progressDialog.dismiss();
         }
     }
 }
