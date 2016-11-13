@@ -49,14 +49,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             setTextView(savedInstanceState.getString("MainText"));
             if (savedInstanceState.getBoolean("AsyncTaskStatus")) {
-                isRunning = true;
-                progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
-                progressDialog.setMessage("Retrieving data");
-                progressDialog.setIndeterminate(true);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-                asyncTaskRunner = new AsyncTaskRunner();
-                asyncTaskRunner.execute(url);
+                mainRunner();
             }
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -75,20 +68,24 @@ public class MainActivity extends AppCompatActivity {
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
-                    isRunning = true;
-                    progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setMessage("Retrieving data");
-                    progressDialog.setIndeterminate(true);
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-                    asyncTaskRunner = new AsyncTaskRunner();
-                    asyncTaskRunner.execute(url);
+                    mainRunner();
                 } else {
                     //Log.e(ERROR_TAG, "ERROR : No network connection available!");
                     setTextView("ERROR : No network connection available!");
                 }
             }
         });
+    }
+
+    public void mainRunner() {
+        isRunning = true;
+        progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("Retrieving data");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        asyncTaskRunner = new AsyncTaskRunner();
+        asyncTaskRunner.execute(url);
     }
 
     @Override
