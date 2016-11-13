@@ -2,4 +2,10 @@
     <string name="app_name">AsyncTask Demo</string>
     <string name="action_exit">Exit</string>
     <string name="default_text">This appplication is built as a demo to showcase the use of AsyncTask to perform network operations in a separate thread from the UI thread. It fetches data from the \'About\' page of the IIIT Delhi website in an AsyncTask. Press the button to retrieve data.</string>
+    <string name="slide1title">Welcome!</string>
+    <string name="slide1description">This appplication is built as a demo to showcase the use of AsyncTask to perform network operations in a separate thread from the UI thread</string>
+    <string name="slide2title">AsyncTask Demo</string>
+    <string name="slide2description">It fetches data from the \'About\' page of the IIIT Delhi website in an AsyncTask</string>
+    <string name="slide3title">How to use</string>
+    <string name="slide3description">Press the REFRESH button the load data</string>
 </resources>
